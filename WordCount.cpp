@@ -70,18 +70,29 @@ std::vector<std::string> getCamelCaseWordsFromCode(std::string const& code)
     return words;
 }
 
-std::vector<std::pair<std::string, size_t>> getWordCount(std::string const& code)
+std::vector<std::string> getSymbols(std::string const& code)
 {
     auto symbols = std::vector<std::string>{};
     boost::split(symbols, code, isDelimiter);
     symbols.erase(std::remove(begin(symbols), end(symbols), ""), end(symbols));
-    auto words = getWordsFromCamelCase(symbols);
-    
+    return symbols;
+}
+
+std::map<std::string, size_t> countWords(std::vector<std::string> const& words)
+{
     auto wordCount = std::map<std::string, size_t>{};
     for (auto const& word : words)
     {
         ++wordCount[toLowerString(word)];
     }
+    return wordCount;
+}
+
+std::vector<std::pair<std::string, size_t>> getWordCount(std::string const& code)
+{
+    auto const symbols = getSymbols(code);
+    auto const words = getWordsFromCamelCase(symbols);
+    auto const wordCount = countWords(words);
     
     auto sortedWordCount = std::vector<std::pair<std::string, size_t>>(begin(wordCount), end(wordCount));
     std::sort(begin(sortedWordCount), end(sortedWordCount), [](auto const& p1, auto const& p2){ return p1.second > p2.second; });
