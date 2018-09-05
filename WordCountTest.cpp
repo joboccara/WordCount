@@ -23,3 +23,16 @@ if (insertionMarker == null) {
         {"if",1},{"new",1},{"null",1},{"positions",1},{"put",1},{"length",1} };
     REQUIRE(getWordCount(input) == expected);
 }
+
+TEST_CASE("Extract camelCaseWords from code")
+{
+    REQUIRE(getCamelCaseWordsFromCode("helloWorld") == std::vector<std::string>{ "hello", "World" });
+    REQUIRE(getCamelCaseWordsFromCode("helloWorldX") == std::vector<std::string>{ "hello", "World", "X" });
+    REQUIRE(getCamelCaseWordsFromCode("helloWorld howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(getCamelCaseWordsFromCode("  helloWorld howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(getCamelCaseWordsFromCode("   helloWorld howAreYou  ") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(getCamelCaseWordsFromCode("helloWorld->howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(getCamelCaseWordsFromCode("   ") == std::vector<std::string>{});
+    REQUIRE(getCamelCaseWordsFromCode("") == std::vector<std::string>{});
+}
+

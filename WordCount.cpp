@@ -57,6 +57,19 @@ std::string toLowerString(std::string const& s)
     return lower;
 }
 
+std::vector<std::string> getCamelCaseWordsFromCode(std::string const& code)
+{
+    auto words = std::vector<std::string>{};
+    auto beginWord = std::find_if_not(begin(code), end(code), isDelimiter);
+    while (beginWord != end(code))
+    {
+        auto endWord = std::find_if(std::next(beginWord), end(code), [](char c){ return isDelimiter(c) || isupper(c); });
+        words.emplace_back(beginWord, endWord);
+        beginWord = std::find_if_not(endWord, end(code), isDelimiter);
+    }
+    return words;
+}
+
 std::vector<std::pair<std::string, size_t>> getWordCount(std::string const& code)
 {
     auto symbols = std::vector<std::string>{};
