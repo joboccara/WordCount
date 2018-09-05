@@ -1,3 +1,4 @@
+#include "WordCount.hpp"
 #include <boost/algorithm/string.hpp>
 #include <cctype>
 #include <iostream>
@@ -57,17 +58,33 @@ std::string toLowerString(std::string const& s)
     return lower;
 }
 
-std::vector<std::string> getCamelCaseWordsFromCode(std::string const& code)
+template<typename EndOfWordPredicate>
+std::vector<std::string> getWordsFromCode(std::string const& code, EndOfWordPredicate isEndOfWord)
 {
     auto words = std::vector<std::string>{};
     auto beginWord = std::find_if_not(begin(code), end(code), isDelimiter);
     while (beginWord != end(code))
     {
-        auto endWord = std::find_if(std::next(beginWord), end(code), [](char c){ return isDelimiter(c) || isupper(c); });
+        auto endWord = std::find_if(std::next(beginWord), end(code), isEndOfWord);
         words.emplace_back(beginWord, endWord);
         beginWord = std::find_if_not(endWord, end(code), isDelimiter);
     }
     return words;
+}
+
+template<typename TypeOfWords>
+std::vector<std::string> getWordsFromCode(std::string const& code);
+
+template<>
+std::vector<std::string> getWordsFromCode<EntireWords>(std::string const& code)
+{
+    return getWordsFromCode(code, isDelimiter);
+}
+
+template<>
+std::vector<std::string> getWordsFromCode<WordsInCamelCase>(std::string const& code)
+{
+    return getWordsFromCode(code, [](char c){ return isDelimiter(c) || isupper(c); });
 }
 
 std::vector<std::string> getSymbols(std::string const& code)
@@ -90,8 +107,7 @@ std::map<std::string, size_t> countWords(std::vector<std::string> const& words)
 
 std::vector<std::pair<std::string, size_t>> getWordCount(std::string const& code)
 {
-    auto const symbols = getSymbols(code);
-    auto const words = getWordsFromCamelCase(symbols);
+    auto const words = getWordsFromCode<WordsInCamelCase>(code);
     auto const wordCount = countWords(words);
     
     auto sortedWordCount = std::vector<std::pair<std::string, size_t>>(begin(wordCount), end(wordCount));

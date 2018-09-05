@@ -1,12 +1,6 @@
 #include "catch.hpp"
 #include "WordCount.hpp"
 
-TEST_CASE("Extract words from camelCase")
-{
-    REQUIRE(getWordsFromCamelCase("helloWorld") == std::vector<std::string>{ "hello", "World" });
-    REQUIRE(getWordsFromCamelCase("helloWorldX") == std::vector<std::string>{ "hello", "World", "X" });
-}
-
 TEST_CASE("Word count")
 {
     static constexpr auto input = R"(
@@ -24,15 +18,28 @@ if (insertionMarker == null) {
     REQUIRE(getWordCount(input) == expected);
 }
 
-TEST_CASE("Extract camelCaseWords from code")
+    
+TEST_CASE("Extract words from code")
 {
-    REQUIRE(getCamelCaseWordsFromCode("helloWorld") == std::vector<std::string>{ "hello", "World" });
-    REQUIRE(getCamelCaseWordsFromCode("helloWorldX") == std::vector<std::string>{ "hello", "World", "X" });
-    REQUIRE(getCamelCaseWordsFromCode("helloWorld howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
-    REQUIRE(getCamelCaseWordsFromCode("  helloWorld howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
-    REQUIRE(getCamelCaseWordsFromCode("   helloWorld howAreYou  ") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
-    REQUIRE(getCamelCaseWordsFromCode("helloWorld->howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
-    REQUIRE(getCamelCaseWordsFromCode("   ") == std::vector<std::string>{});
-    REQUIRE(getCamelCaseWordsFromCode("") == std::vector<std::string>{});
+    REQUIRE(getWordsFromCode<EntireWords>("helloWorld") == std::vector<std::string>{ "helloWorld" });
+    REQUIRE(getWordsFromCode<EntireWords>("helloWorld howAreYou") == std::vector<std::string>{ "helloWorld", "howAreYou" });
+    REQUIRE(getWordsFromCode<EntireWords>("  helloWorld howAreYou") == std::vector<std::string>{ "helloWorld", "howAreYou" });
+    REQUIRE(getWordsFromCode<EntireWords>("   helloWorld howAreYou  ") == std::vector<std::string>{ "helloWorld", "howAreYou" });
+    REQUIRE(getWordsFromCode<EntireWords>("helloWorld->howAreYou") == std::vector<std::string>{ "helloWorld", "howAreYou" });
+    REQUIRE(getWordsFromCode<EntireWords>("   ") == std::vector<std::string>{});
+    REQUIRE(getWordsFromCode<EntireWords>("") == std::vector<std::string>{});
+}
+
+    
+TEST_CASE("Extract camel case words from code")
+{
+    REQUIRE(getWordsFromCode<WordsInCamelCase>("helloWorld") == std::vector<std::string>{ "hello", "World" });
+    REQUIRE(getWordsFromCode<WordsInCamelCase>("helloWorldX") == std::vector<std::string>{ "hello", "World", "X" });
+    REQUIRE(getWordsFromCode<WordsInCamelCase>("helloWorld howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(getWordsFromCode<WordsInCamelCase>("  helloWorld howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(getWordsFromCode<WordsInCamelCase>("   helloWorld howAreYou  ") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(getWordsFromCode<WordsInCamelCase>("helloWorld->howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(getWordsFromCode<WordsInCamelCase>("   ") == std::vector<std::string>{});
+    REQUIRE(getWordsFromCode<WordsInCamelCase>("") == std::vector<std::string>{});
 }
 
