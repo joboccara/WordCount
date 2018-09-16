@@ -1,5 +1,19 @@
 #include "catch.hpp"
 #include "WordCount.hpp"
+#include <iostream>
+#include <iomanip>
+
+void print(WordCount const& entries)
+{
+    if (entries.empty()) return;
+    auto const longestWord = *std::max_element(begin(entries), end(entries), [](auto const& p1, auto const& p2){ return p1.first.size() < p2.first.size(); });
+    auto const longestWordSize = (int)longestWord.first.size();
+    
+    for (auto const& entry : entries)
+    {
+        std::cout << std::setw(longestWordSize + 1) << std::left << entry.first << '|' << std::setw(10) << std::right << entry.second << '\n';
+    }
+}
 
 TEST_CASE("Word count")
 {
@@ -11,10 +25,10 @@ if (insertionMarker == null) {
     insertionMap.put(key, insertionMarker);
     positions.add(block.getStart());
     )";
-    
-    auto const expected = WordCount { {"insertion",8},{"marker",6},{"get",5},{"block",4},
-        {"start",3},{"key",3},{"map",2},{"add",1},{"integer",1},
-        {"if",1},{"new",1},{"null",1},{"positions",1},{"put",1},{"length",1} };
+
+    auto const expected = WordCount { {"insertion",6},{"Marker",6},{"get",5},{"block",4},
+        {"key",3},{"Start",3},{"Insertion",2},{"Map",2},{"add",1},{"if",1},{"Length",1},
+        {"Integer",1},{"new",1},{"null",1},{"positions",1},{"put",1} };
     REQUIRE(getWordCount(input) == expected);
 }
 
