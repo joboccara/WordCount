@@ -13,12 +13,15 @@ bool isDelimiter(char c)
     return !isAllowedInName;
 }
 
-template<typename Key, typename Value>
-void print(std::vector<std::pair<Key, Value>> const& entries)
+void print(WordCount const& entries)
 {
+    if (entries.empty()) return;
+    auto const longestWord = *std::max_element(begin(entries), end(entries), [](auto const& p1, auto const& p2){ return p1.first.size() < p2.first.size(); });
+    auto const longestWordSize = (int)longestWord.first.size();
+    
     for (auto const& entry : entries)
     {
-        std::cout << std::setw(30) << std::left << entry.first << '|' << std::setw(10) << std::right << entry.second << '\n';
+        std::cout << std::setw(longestWordSize + 1) << std::left << entry.first << '|' << std::setw(10) << std::right << entry.second << '\n';
     }
 }
 
@@ -28,7 +31,7 @@ std::vector<std::string> getWordsFromCamelCase(std::string const& symbol)
     auto beginWord = begin(symbol);
     while (beginWord != end(symbol))
     {
-        auto endWord = std::find_if(std::next(beginWord), end(symbol), [](char c){ return std::isupper(c); });
+        auto const endWord = std::find_if(std::next(beginWord), end(symbol), [](char c){ return std::isupper(c); });
         if (beginWord != endWord)
         {
             words.push_back(std::string(beginWord, endWord));
@@ -65,24 +68,24 @@ std::vector<std::string> getWordsFromCode(std::string const& code, EndOfWordPred
     auto beginWord = std::find_if_not(begin(code), end(code), isDelimiter);
     while (beginWord != end(code))
     {
-        auto endWord = std::find_if(std::next(beginWord), end(code), isEndOfWord);
+        auto const endWord = std::find_if(std::next(beginWord), end(code), isEndOfWord);
         words.emplace_back(beginWord, endWord);
         beginWord = std::find_if_not(endWord, end(code), isDelimiter);
     }
     return words;
 }
 
-template<typename TypeOfWords>
+template<HowToDelimitWords>
 std::vector<std::string> getWordsFromCode(std::string const& code);
 
 template<>
-std::vector<std::string> getWordsFromCode<EntireWords>(std::string const& code)
+std::vector<std::string> getWordsFromCode<HowToDelimitWords::EntireWords>(std::string const& code)
 {
     return getWordsFromCode(code, isDelimiter);
 }
 
 template<>
-std::vector<std::string> getWordsFromCode<WordsInCamelCase>(std::string const& code)
+std::vector<std::string> getWordsFromCode<HowToDelimitWords::WordsInCamelCase>(std::string const& code)
 {
     return getWordsFromCode(code, [](char c){ return isDelimiter(c) || isupper(c); });
 }
@@ -105,12 +108,12 @@ std::map<std::string, size_t> countWords(std::vector<std::string> const& words)
     return wordCount;
 }
 
-std::vector<std::pair<std::string, size_t>> getWordCount(std::string const& code)
+WordCount getWordCount(std::string const& code)
 {
-    auto const words = getWordsFromCode<WordsInCamelCase>(code);
+    auto const words = getWordsFromCode<HowToDelimitWords::WordsInCamelCase>(code);
     auto const wordCount = countWords(words);
     
-    auto sortedWordCount = std::vector<std::pair<std::string, size_t>>(begin(wordCount), end(wordCount));
+    auto sortedWordCount = WordCount(begin(wordCount), end(wordCount));
     std::sort(begin(sortedWordCount), end(sortedWordCount), [](auto const& p1, auto const& p2){ return p1.second > p2.second; });
     
     return sortedWordCount;

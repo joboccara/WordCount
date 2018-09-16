@@ -2,14 +2,19 @@
 #define WordCount_hpp
 
 #include <string>
+#include <utility>
 #include <vector>
 
-struct EntireWords{};
-struct WordsInCamelCase{};
+enum class HowToDelimitWords
+{
+    EntireWords,
+    WordsInCamelCase
+};
 
-template<typename HowToDelimitWords>
+template<HowToDelimitWords>
 std::vector<std::string> getWordsFromCode(std::string const& code);
 
-std::vector<std::pair<std::string, size_t>> getWordCount(std::string const& code);
+using WordCount = std::vector<std::pair<std::string, size_t>>;
+WordCount getWordCount(std::string const& code);
 
 #endif /* WordCount_hpp */
