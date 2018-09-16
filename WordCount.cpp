@@ -5,6 +5,31 @@
 #include <map>
 #include <vector>
 
+WordData::WordData() : nbOccurrences_(){}
+
+size_t WordData::nbOccurrences() const
+{
+    return nbOccurrences_;
+}
+
+void WordData::addOneOccurrence()
+{
+    ++nbOccurrences_;
+}
+
+bool operator<(WordData const& wordData1, WordData const& wordData2)
+{
+    return wordData1.nbOccurrences() < wordData2.nbOccurrences();
+}
+
+bool operator>=(WordData const& wordData1, WordData const& wordData2) { return !(wordData1 < wordData2); }
+bool operator<=(WordData const& wordData1, WordData const& wordData2) { return !(wordData2 < wordData1); }
+bool operator>(WordData const& wordData1, WordData const& wordData2) { return !(wordData1 <= wordData2); }
+bool operator==(WordData const& wordData1, WordData const& wordData2) { return !(wordData1 < wordData2) && !(wordData2 < wordData1); }
+bool operator!=(WordData const& wordData1, WordData const& wordData2) { return !(wordData1 == wordData2); }
+
+WordData::WordData(size_t nbOccurrences) : nbOccurrences_(nbOccurrences){}
+
 bool isDelimiter(char c)
 {
     auto const isAllowedInName = isalnum(c) || c == '_';
@@ -48,12 +73,12 @@ std::vector<std::string> getSymbols(std::string const& code)
     return symbols;
 }
 
-std::map<std::string, size_t> countWords(std::vector<std::string> const& words)
+std::map<std::string, WordData> countWords(std::vector<std::string> const& words)
 {
-    auto wordCount = std::map<std::string, size_t>{};
+    auto wordCount = std::map<std::string, WordData>{};
     for (auto const& word : words)
     {
-        ++wordCount[word];
+        wordCount[word].addOneOccurrence();
     }
     return wordCount;
 }

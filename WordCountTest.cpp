@@ -11,7 +11,7 @@ void print(WordCount const& entries)
     
     for (auto const& entry : entries)
     {
-        std::cout << std::setw(longestWordSize + 1) << std::left << entry.first << '|' << std::setw(10) << std::right << entry.second << '\n';
+        std::cout << std::setw(longestWordSize + 1) << std::left << entry.first << '|' << std::setw(10) << std::right << entry.second.nbOccurrences() << '\n';
     }
 }
 
@@ -26,9 +26,9 @@ if (insertionMarker == null) {
     positions.add(block.getStart());
     )";
 
-    auto const expected = WordCount { {"insertion",6},{"Marker",6},{"get",5},{"block",4},
-        {"key",3},{"Start",3},{"Insertion",2},{"Map",2},{"add",1},{"if",1},{"Length",1},
-        {"Integer",1},{"new",1},{"null",1},{"positions",1},{"put",1} };
+    auto const expected = WordCount { {"insertion", WordData(6)},{"Marker",WordData(6)},{"get",WordData(5)},{"block",WordData(4)},
+        {"key",WordData(3)},{"Start",WordData(3)},{"Insertion",WordData(2)},{"Map",WordData(2)},{"add",WordData(1)},{"if",WordData(1)},{"Length",WordData(1)},
+        {"Integer",WordData(1)},{"new",WordData(1)},{"null",WordData(1)},{"positions",WordData(1)},{"put",WordData(1)} };
     REQUIRE(getWordCount(input) == expected);
 }
 
