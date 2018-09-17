@@ -26,9 +26,23 @@ if (insertionMarker == null) {
     positions.add(block.getStart());
     )";
 
-    auto const expected = WordCount { {"insertion", WordData(6)},{"Marker",WordData(6)},{"get",WordData(5)},{"block",WordData(4)},
-        {"key",WordData(3)},{"Start",WordData(3)},{"Insertion",WordData(2)},{"Map",WordData(2)},{"add",WordData(1)},{"if",WordData(1)},{"Length",WordData(1)},
-        {"Integer",WordData(1)},{"new",WordData(1)},{"null",WordData(1)},{"positions",WordData(1)},{"put",WordData(1)} };
+    auto const expected = WordCount {
+        {"insertion", WordStats(6)},
+        {"Marker",WordStats(6)},
+        {"get",WordStats(5)},
+        {"block",WordStats(4)},
+        {"key",WordStats(3)},
+        {"Start",WordStats(3)},
+        {"Insertion",WordStats(2)},
+        {"Map",WordStats(2)},
+        {"add",WordStats(1)},
+        {"if",WordStats(1)},
+        {"Length",WordStats(1)},
+        {"Integer",WordStats(1)},
+        {"new",WordStats(1)},
+        {"null",WordStats(1)},
+        {"positions",WordStats(1)},
+        {"put",WordStats(1)} };
     REQUIRE(getWordCount(input) == expected);
 }
 
