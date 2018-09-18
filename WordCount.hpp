@@ -11,8 +11,17 @@ enum class HowToDelimitWords
     WordsInCamelCase
 };
 
+class WordData
+{
+public:
+    explicit WordData(std::string word);
+    std::string const& word() const;
+private:
+    std::string word_;
+};
+
 template<HowToDelimitWords>
-std::vector<std::string> getWordsFromCode(std::string const& code);
+std::vector<WordData> getWordDataFromCode(std::string const& code);
 
 class WordStats
 {

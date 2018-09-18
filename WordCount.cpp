@@ -30,6 +30,13 @@ bool operator!=(WordStats const& wordStats1, WordStats const& wordStats2) { retu
 
 WordStats::WordStats(size_t nbOccurrences) : nbOccurrences_(nbOccurrences){}
 
+WordData::WordData(std::string word) : word_(word){}
+
+std::string const& WordData::word() const
+{
+    return word_;
+}
+
 bool isDelimiter(char c)
 {
     auto const isAllowedInName = isalnum(c) || c == '_';
@@ -37,32 +44,32 @@ bool isDelimiter(char c)
 }
 
 template<typename EndOfWordPredicate>
-std::vector<std::string> getWordsFromCode(std::string const& code, EndOfWordPredicate isEndOfWord)
+std::vector<WordData> getWordDataFromCode(std::string const& code, EndOfWordPredicate isEndOfWord)
 {
-    auto words = std::vector<std::string>{};
+    auto words = std::vector<WordData>{};
     auto beginWord = std::find_if_not(begin(code), end(code), isDelimiter);
     while (beginWord != end(code))
     {
         auto const endWord = std::find_if(std::next(beginWord), end(code), isEndOfWord);
-        words.emplace_back(beginWord, endWord);
+        words.emplace_back(std::string(beginWord, endWord));
         beginWord = std::find_if_not(endWord, end(code), isDelimiter);
     }
     return words;
 }
 
 template<HowToDelimitWords>
-std::vector<std::string> getWordsFromCode(std::string const& code);
+std::vector<WordData> getWordDataFromCode(std::string const& code);
 
 template<>
-std::vector<std::string> getWordsFromCode<HowToDelimitWords::EntireWords>(std::string const& code)
+std::vector<WordData> getWordDataFromCode<HowToDelimitWords::EntireWords>(std::string const& code)
 {
-    return getWordsFromCode(code, isDelimiter);
+    return getWordDataFromCode(code, isDelimiter);
 }
 
 template<>
-std::vector<std::string> getWordsFromCode<HowToDelimitWords::WordsInCamelCase>(std::string const& code)
+std::vector<WordData> getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>(std::string const& code)
 {
-    return getWordsFromCode(code, [](char c){ return isDelimiter(c) || isupper(c); });
+    return getWordDataFromCode(code, [](char c){ return isDelimiter(c) || isupper(c); });
 }
 
 std::vector<std::string> getSymbols(std::string const& code)
@@ -73,19 +80,19 @@ std::vector<std::string> getSymbols(std::string const& code)
     return symbols;
 }
 
-std::map<std::string, WordStats> countWords(std::vector<std::string> const& words)
+std::map<std::string, WordStats> countWords(std::vector<WordData> const& wordData)
 {
     auto wordCount = std::map<std::string, WordStats>{};
-    for (auto const& word : words)
+    for (auto const& oneWordData : wordData)
     {
-        wordCount[word].addOneOccurrence();
+        wordCount[oneWordData.word()].addOneOccurrence();
     }
     return wordCount;
 }
 
 WordCount getWordCount(std::string const& code)
 {
-    auto const words = getWordsFromCode<HowToDelimitWords::WordsInCamelCase>(code);
+    auto const words = getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>(code);
     auto const wordCount = countWords(words);
     
     auto sortedWordCount = WordCount(begin(wordCount), end(wordCount));

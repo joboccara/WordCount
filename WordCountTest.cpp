@@ -1,7 +1,11 @@
 #include "catch.hpp"
+#include "helpers.hpp"
 #include "WordCount.hpp"
+#include <algorithm>
 #include <iostream>
 #include <iomanip>
+#include <string>
+#include <vector>
 
 void print(WordCount const& entries)
 {
@@ -46,28 +50,33 @@ if (insertionMarker == null) {
     REQUIRE(getWordCount(input) == expected);
 }
 
+std::vector<std::string> words(std::vector<WordData> const& wordData)
+{
+    auto words = std::vector<std::string>{};
+    std::transform(begin(wordData), end(wordData), back_inserter(words), callMethod(&::WordData::word));
+    return words;
+}
     
 TEST_CASE("Extract words from code")
 {
-    REQUIRE(getWordsFromCode<HowToDelimitWords::EntireWords>("helloWorld") == std::vector<std::string>{ "helloWorld" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::EntireWords>("helloWorld howAreYou") == std::vector<std::string>{ "helloWorld", "howAreYou" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::EntireWords>("  helloWorld howAreYou") == std::vector<std::string>{ "helloWorld", "howAreYou" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::EntireWords>("   helloWorld howAreYou  ") == std::vector<std::string>{ "helloWorld", "howAreYou" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::EntireWords>("helloWorld->howAreYou") == std::vector<std::string>{ "helloWorld", "howAreYou" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::EntireWords>("   ") == std::vector<std::string>{});
-    REQUIRE(getWordsFromCode<HowToDelimitWords::EntireWords>("") == std::vector<std::string>{});
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld")) == std::vector<std::string>{ "helloWorld" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld howAreYou")) == std::vector<std::string>{ "helloWorld", "howAreYou" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::EntireWords>("  helloWorld howAreYou")) == std::vector<std::string>{ "helloWorld", "howAreYou" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::EntireWords>("   helloWorld howAreYou  ")) == std::vector<std::string>{ "helloWorld", "howAreYou" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld->howAreYou")) == std::vector<std::string>{ "helloWorld", "howAreYou" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::EntireWords>("   ")) == std::vector<std::string>{});
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::EntireWords>("")) == std::vector<std::string>{});
 }
-
     
 TEST_CASE("Extract camel case words from code")
 {
-    REQUIRE(getWordsFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld") == std::vector<std::string>{ "hello", "World" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorldX") == std::vector<std::string>{ "hello", "World", "X" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::WordsInCamelCase>("  helloWorld howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::WordsInCamelCase>("   helloWorld howAreYou  ") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld->howAreYou") == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
-    REQUIRE(getWordsFromCode<HowToDelimitWords::WordsInCamelCase>("   ") == std::vector<std::string>{});
-    REQUIRE(getWordsFromCode<HowToDelimitWords::WordsInCamelCase>("") == std::vector<std::string>{});
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld")) == std::vector<std::string>{ "hello", "World" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorldX")) == std::vector<std::string>{ "hello", "World", "X" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld howAreYou")) == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("  helloWorld howAreYou")) == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("   helloWorld howAreYou  ")) == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld->howAreYou")) == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("   ")) == std::vector<std::string>{});
+    REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("")) == std::vector<std::string>{});
 }
 
