@@ -17,16 +17,16 @@ void WordStats::addOneOccurrence()
     ++nbOccurrences_;
 }
 
-bool operator<(WordStats const& wordData1, WordStats const& wordData2)
+bool operator<(WordStats const& wordStats1, WordStats const& wordStats2)
 {
-    return wordData1.nbOccurrences() < wordData2.nbOccurrences();
+    return wordStats1.nbOccurrences() < wordStats2.nbOccurrences();
 }
 
-bool operator>=(WordStats const& wordData1, WordStats const& wordData2) { return !(wordData1 < wordData2); }
-bool operator<=(WordStats const& wordData1, WordStats const& wordData2) { return !(wordData2 < wordData1); }
-bool operator>(WordStats const& wordData1, WordStats const& wordData2) { return !(wordData1 <= wordData2); }
-bool operator==(WordStats const& wordData1, WordStats const& wordData2) { return !(wordData1 < wordData2) && !(wordData2 < wordData1); }
-bool operator!=(WordStats const& wordData1, WordStats const& wordData2) { return !(wordData1 == wordData2); }
+bool operator>=(WordStats const& wordStats1, WordStats const& wordStats2) { return !(wordStats1 < wordStats2); }
+bool operator<=(WordStats const& wordStats1, WordStats const& wordStats2) { return !(wordStats2 < wordStats1); }
+bool operator>(WordStats const& wordStats1, WordStats const& wordStats2) { return !(wordStats1 <= wordStats2); }
+bool operator==(WordStats const& wordStats1, WordStats const& wordStats2) { return !(wordStats1 < wordStats2) && !(wordStats2 < wordStats1); }
+bool operator!=(WordStats const& wordStats1, WordStats const& wordStats2) { return !(wordStats1 == wordStats2); }
 
 WordStats::WordStats(size_t nbOccurrences) : nbOccurrences_(nbOccurrences){}
 

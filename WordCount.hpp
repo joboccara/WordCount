@@ -27,12 +27,12 @@ public: // reserved for testing
     explicit WordStats(size_t nbOccurrences);
 };
 
-bool operator==(WordStats const& wordData1, WordStats const& wordData2);
-bool operator!=(WordStats const& wordData1, WordStats const& wordData2);
-bool operator<(WordStats const& wordData1, WordStats const& wordData2);
-bool operator>(WordStats const& wordData1, WordStats const& wordData2);
-bool operator<=(WordStats const& wordData1, WordStats const& wordData2);
-bool operator>=(WordStats const& wordData1, WordStats const& wordData2);
+bool operator==(WordStats const& wordStats1, WordStats const& wordStats2);
+bool operator!=(WordStats const& wordStats1, WordStats const& wordStats2);
+bool operator<(WordStats const& wordStats1, WordStats const& wordStats2);
+bool operator>(WordStats const& wordStats1, WordStats const& wordStats2);
+bool operator<=(WordStats const& wordStats1, WordStats const& wordStats2);
+bool operator>=(WordStats const& wordStats1, WordStats const& wordStats2);
 
 using WordCount = std::vector<std::pair<std::string, WordStats>>;
 WordCount getWordCount(std::string const& code);
