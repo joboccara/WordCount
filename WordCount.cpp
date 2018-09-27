@@ -22,15 +22,16 @@ bool operator<(WordStats const& wordStats1, WordStats const& wordStats2)
     return wordStats1.nbOccurrences() < wordStats2.nbOccurrences();
 }
 
-bool operator>=(WordStats const& wordStats1, WordStats const& wordStats2) { return !(wordStats1 < wordStats2); }
-bool operator<=(WordStats const& wordStats1, WordStats const& wordStats2) { return !(wordStats2 < wordStats1); }
-bool operator>(WordStats const& wordStats1, WordStats const& wordStats2) { return !(wordStats1 <= wordStats2); }
-bool operator==(WordStats const& wordStats1, WordStats const& wordStats2) { return !(wordStats1 < wordStats2) && !(wordStats2 < wordStats1); }
-bool operator!=(WordStats const& wordStats1, WordStats const& wordStats2) { return !(wordStats1 == wordStats2); }
-
 WordStats::WordStats(size_t nbOccurrences) : nbOccurrences_(nbOccurrences){}
 
-WordData::WordData(std::string word) : word_(std::move(word)){}
+WordData::WordData(std::string word, size_t position) : word_(std::move(word)), position_(position){}
+
+bool operator<(WordData const& wordData1, WordData const& wordData2)
+{
+    if (wordData1.word() < wordData2.word()) return true;
+    if (wordData2.word() < wordData1.word()) return false;
+    return wordData1.position() < wordData2.position();
+}
 
 std::string const& WordData::word() const
 {
@@ -51,7 +52,8 @@ std::vector<WordData> getWordDataFromCode(std::string const& code, EndOfWordPred
     while (beginWord != end(code))
     {
         auto const endWord = std::find_if(std::next(beginWord), end(code), isEndOfWord);
-        words.emplace_back(std::string(beginWord, endWord));
+        auto const wordPosition = std::distance(begin(code), beginWord);
+        words.emplace_back(std::string(beginWord, endWord), wordPosition);
         beginWord = std::find_if_not(endWord, end(code), isDelimiter);
     }
     return words;

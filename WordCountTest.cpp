@@ -68,6 +68,24 @@ TEST_CASE("Extract words from code")
     REQUIRE(words(getWordDataFromCode<HowToDelimitWords::EntireWords>("")) == std::vector<std::string>{});
 }
     
+std::vector<size_t> positions(std::vector<WordData> const& wordData)
+{
+    auto positions = std::vector<size_t>{};
+    std::transform(begin(wordData), end(wordData), back_inserter(positions), callMethod(&::WordData::position));
+    return positions;
+}
+
+TEST_CASE("Extract positions from code")
+{
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld")) == std::vector<size_t>{ 0 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld howAreYou")) == std::vector<size_t>{ 0, 11 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("  helloWorld howAreYou")) == std::vector<size_t>{ 2, 13 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("   helloWorld howAreYou  ")) == std::vector<size_t>{ 3, 14 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld->howAreYou")) == std::vector<size_t>{ 0, 12 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("   ")) == std::vector<size_t>{ });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("")) == std::vector<size_t>{ });
+}
+
 TEST_CASE("Extract camel case words from code")
 {
     REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld")) == std::vector<std::string>{ "hello", "World" });
@@ -78,5 +96,17 @@ TEST_CASE("Extract camel case words from code")
     REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld->howAreYou")) == std::vector<std::string>{ "hello", "World", "how", "Are", "You" });
     REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("   ")) == std::vector<std::string>{});
     REQUIRE(words(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("")) == std::vector<std::string>{});
+}
+
+TEST_CASE("Extract camel case psitions from code")
+{
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld")) == std::vector<size_t>{ 0, 5 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorldX")) == std::vector<size_t>{ 0, 5, 10 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld howAreYou")) == std::vector<size_t>{ 0, 5, 11, 14, 17 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("  helloWorld howAreYou")) == std::vector<size_t>{ 2, 7, 13, 16, 19 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("   helloWorld howAreYou  ")) == std::vector<size_t>{ 3, 8, 14,17,20 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld->howAreYou")) == std::vector<size_t>{ 0,5,12, 15, 18 });
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("   ")) == std::vector<size_t>{});
+    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("")) == std::vector<size_t>{});
 }
 

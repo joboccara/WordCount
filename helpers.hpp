@@ -21,4 +21,15 @@ CallMethod<T, Res, Args...> callMethod(Res(T::* memberFunction)(Args...) const)
     return CallMethod<T, Res, Args...>(memberFunction);
 }
 
+template<typename Derived>
+struct Comparable
+{
+    bool operator>=(Derived const& other) const { return !(static_cast<Derived const&>(*this) < other); }
+    bool operator<=(Derived const& other) const { return !(other < static_cast<Derived const&>(*this)); }
+    bool operator>(Derived const& other) const { return !(*this <= other); }
+    bool operator==(Derived const& other) const { return !(static_cast<Derived const&>(*this) < other) && !(other < static_cast<Derived const&>(*this)); }
+    bool operator!=(Derived const& other) const { return !(*this == other); }
+};
+
+
 #endif /* helpers_hpp */
