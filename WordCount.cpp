@@ -30,7 +30,7 @@ bool operator!=(WordStats const& wordStats1, WordStats const& wordStats2) { retu
 
 WordStats::WordStats(size_t nbOccurrences) : nbOccurrences_(nbOccurrences){}
 
-WordData::WordData(std::string word) : word_(word){}
+WordData::WordData(std::string word) : word_(std::move(word)){}
 
 std::string const& WordData::word() const
 {
