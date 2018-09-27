@@ -2,9 +2,10 @@
 #include "helpers.hpp"
 #include "WordCount.hpp"
 #include <algorithm>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 void print(WordCount const& entries)
@@ -13,9 +14,24 @@ void print(WordCount const& entries)
     auto const longestWord = *std::max_element(begin(entries), end(entries), [](auto const& p1, auto const& p2){ return p1.first.size() < p2.first.size(); });
     auto const longestWordSize = (int)longestWord.first.size();
     
+    std::cout
+    << std::setw(longestWordSize + 1) << std::left << "Word"
+    << '|'
+    << std::setw(4) << std::right << "#"
+    << '|'
+    << std::setw(4) << std::right << "span"
+    << '\n';
+    std::cout << std::string(longestWordSize + 1 + 1 + 4 + 1 + 4, '-') << '\n';
+    
     for (auto const& entry : entries)
     {
-        std::cout << std::setw(longestWordSize + 1) << std::left << entry.first << '|' << std::setw(10) << std::right << entry.second.nbOccurrences() << '\n';
+        std::cout
+        << std::setw(longestWordSize + 1) << std::left << entry.first
+        << '|'
+        << std::setw(4) << std::right << entry.second.nbOccurrences()
+        << '|'
+        << std::setw(4) << std::right << entry.second.span()
+        << '\n';
     }
 }
 
@@ -30,32 +46,31 @@ if (insertionMarker == null) {
     positions.add(block.getStart());
     )";
 
-    auto const expected = WordCount {
-        {"insertion", WordStats(6)},
-        {"Marker",WordStats(6)},
-        {"get",WordStats(5)},
-        {"block",WordStats(4)},
-        {"key",WordStats(3)},
-        {"Start",WordStats(3)},
-        {"Insertion",WordStats(2)},
-        {"Map",WordStats(2)},
-        {"add",WordStats(1)},
-        {"if",WordStats(1)},
-        {"Length",WordStats(1)},
-        {"Integer",WordStats(1)},
-        {"new",WordStats(1)},
-        {"null",WordStats(1)},
-        {"positions",WordStats(1)},
-        {"put",WordStats(1)} };
-    REQUIRE(getWordCount(input) == expected);
+    auto const getResults = project([](auto const& entry){ return std::make_tuple(entry.first, entry.second.nbOccurrences(), entry.second.span()); });
+
+    auto const expected = std::vector<std::tuple<std::string, size_t, size_t>> {
+        {"insertion", 6, 4},
+        {"Marker", 6, 4},
+        {"get", 5, 6},
+        {"block", 4, 6},
+        {"key", 3, 5},
+        {"Start", 3, 6},
+        {"Insertion", 2, 3},
+        {"Map", 2, 4},
+        {"add", 1, 1},
+        {"if", 1, 1},
+        {"Length", 1, 1},
+        {"Integer", 1, 1},
+        {"new", 1, 1},
+        {"null", 1, 1},
+        {"positions", 1, 1},
+        {"put", 1, 1} };
+    REQUIRE(getResults(getWordCount(input)) == expected);
+    
+    print(getWordCount(input));
 }
 
-std::vector<std::string> words(std::vector<WordData> const& wordData)
-{
-    auto words = std::vector<std::string>{};
-    std::transform(begin(wordData), end(wordData), back_inserter(words), callMethod(&::WordData::word));
-    return words;
-}
+auto const words = projectOnMember(&WordData::word);
     
 TEST_CASE("Extract words from code")
 {
@@ -68,22 +83,16 @@ TEST_CASE("Extract words from code")
     REQUIRE(words(getWordDataFromCode<HowToDelimitWords::EntireWords>("")) == std::vector<std::string>{});
 }
     
-std::vector<size_t> positions(std::vector<WordData> const& wordData)
-{
-    auto positions = std::vector<size_t>{};
-    std::transform(begin(wordData), end(wordData), back_inserter(positions), callMethod(&::WordData::position));
-    return positions;
-}
+auto lineNumbers = projectOnMember(&WordData::lineNumber);
 
 TEST_CASE("Extract positions from code")
 {
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld")) == std::vector<size_t>{ 0 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld howAreYou")) == std::vector<size_t>{ 0, 11 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("  helloWorld howAreYou")) == std::vector<size_t>{ 2, 13 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("   helloWorld howAreYou  ")) == std::vector<size_t>{ 3, 14 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld->howAreYou")) == std::vector<size_t>{ 0, 12 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("   ")) == std::vector<size_t>{ });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::EntireWords>("")) == std::vector<size_t>{ });
+    REQUIRE(lineNumbers(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld")) == std::vector<size_t>{ 0 });
+    REQUIRE(lineNumbers(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld howAreYou")) == std::vector<size_t>{ 0, 0 });
+    REQUIRE(lineNumbers(getWordDataFromCode<HowToDelimitWords::EntireWords>("  helloWorld\n howAreYou")) == std::vector<size_t>{ 0, 1 });
+    REQUIRE(lineNumbers(getWordDataFromCode<HowToDelimitWords::EntireWords>(" \n  helloWorld \n howAreYou  \n")) == std::vector<size_t>{ 1, 2 });
+    REQUIRE(lineNumbers(getWordDataFromCode<HowToDelimitWords::EntireWords>("helloWorld\n\nhowAreYou")) == std::vector<size_t>{ 0, 2 });
+
 }
 
 TEST_CASE("Extract camel case words from code")
@@ -100,13 +109,10 @@ TEST_CASE("Extract camel case words from code")
 
 TEST_CASE("Extract camel case psitions from code")
 {
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld")) == std::vector<size_t>{ 0, 5 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorldX")) == std::vector<size_t>{ 0, 5, 10 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld howAreYou")) == std::vector<size_t>{ 0, 5, 11, 14, 17 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("  helloWorld howAreYou")) == std::vector<size_t>{ 2, 7, 13, 16, 19 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("   helloWorld howAreYou  ")) == std::vector<size_t>{ 3, 8, 14,17,20 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld->howAreYou")) == std::vector<size_t>{ 0,5,12, 15, 18 });
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("   ")) == std::vector<size_t>{});
-    REQUIRE(positions(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("")) == std::vector<size_t>{});
+    REQUIRE(lineNumbers(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld")) == std::vector<size_t>{ 0,0 });
+    REQUIRE(lineNumbers(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld howAreYou")) == std::vector<size_t>{ 0,0,0,0,0 });
+    REQUIRE(lineNumbers(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("  helloWorld\n howAreYou")) == std::vector<size_t>{ 0,0, 1,1,1 });
+    REQUIRE(lineNumbers(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>(" \n  helloWorld \n howAreYou  \n")) == std::vector<size_t>{ 1,1, 2,2,2 });
+    REQUIRE(lineNumbers(getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>("helloWorld\n\nhowAreYou")) == std::vector<size_t>{ 0,0, 2,2,2 });
 }
 

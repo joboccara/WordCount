@@ -1,5 +1,6 @@
 #include "WordCount.hpp"
 #include <boost/algorithm/string.hpp>
+#include <algorithm>
 #include <cctype>
 #include <iterator>
 #include <map>
@@ -12,9 +13,37 @@ size_t WordStats::nbOccurrences() const
     return nbOccurrences_;
 }
 
-void WordStats::addOneOccurrence()
+void WordStats::addOneOccurrence(size_t lineNumber)
 {
     ++nbOccurrences_;
+    if (!lowestOccurringLine_)
+    {
+        lowestOccurringLine_ = lineNumber;
+    }
+    else
+    {
+        lowestOccurringLine_ = std::min(*lowestOccurringLine_, lineNumber);
+    }
+    if (!highestOccurringLine_)
+    {
+        highestOccurringLine_ = lineNumber;
+    }
+    else
+    {
+        highestOccurringLine_ = std::max(*highestOccurringLine_, lineNumber);
+    }
+}
+
+size_t WordStats::span() const
+{
+    if (!lowestOccurringLine_ || !lowestOccurringLine_)
+    {
+        return 0;
+    }
+    else
+    {
+        return *highestOccurringLine_ - *lowestOccurringLine_ + 1;
+    }
 }
 
 bool operator<(WordStats const& wordStats1, WordStats const& wordStats2)
@@ -22,15 +51,13 @@ bool operator<(WordStats const& wordStats1, WordStats const& wordStats2)
     return wordStats1.nbOccurrences() < wordStats2.nbOccurrences();
 }
 
-WordStats::WordStats(size_t nbOccurrences) : nbOccurrences_(nbOccurrences){}
-
-WordData::WordData(std::string word, size_t position) : word_(std::move(word)), position_(position){}
+WordData::WordData(std::string word, size_t lineNumber) : word_(std::move(word)), lineNumber_(lineNumber){}
 
 bool operator<(WordData const& wordData1, WordData const& wordData2)
 {
     if (wordData1.word() < wordData2.word()) return true;
     if (wordData2.word() < wordData1.word()) return false;
-    return wordData1.position() < wordData2.position();
+    return wordData1.lineNumber() < wordData2.lineNumber();
 }
 
 std::string const& WordData::word() const
@@ -48,12 +75,16 @@ template<typename EndOfWordPredicate>
 std::vector<WordData> getWordDataFromCode(std::string const& code, EndOfWordPredicate isEndOfWord)
 {
     auto words = std::vector<WordData>{};
+    auto endWord = begin(code);
     auto beginWord = std::find_if_not(begin(code), end(code), isDelimiter);
+    size_t line = 0;
+
     while (beginWord != end(code))
     {
-        auto const endWord = std::find_if(std::next(beginWord), end(code), isEndOfWord);
-        auto const wordPosition = std::distance(begin(code), beginWord);
-        words.emplace_back(std::string(beginWord, endWord), wordPosition);
+        auto const linesBetweenWords = std::count(endWord, beginWord, '\n');
+        line += linesBetweenWords;
+        endWord = std::find_if(std::next(beginWord), end(code), isEndOfWord);
+        words.emplace_back(std::string(beginWord, endWord), line);
         beginWord = std::find_if_not(endWord, end(code), isDelimiter);
     }
     return words;
@@ -82,20 +113,20 @@ std::vector<std::string> getSymbols(std::string const& code)
     return symbols;
 }
 
-std::map<std::string, WordStats> countWords(std::vector<WordData> const& wordData)
+std::map<std::string, WordStats> wordStats(std::vector<WordData> const& wordData)
 {
-    auto wordCount = std::map<std::string, WordStats>{};
+    auto wordStats = std::map<std::string, WordStats>{};
     for (auto const& oneWordData : wordData)
     {
-        wordCount[oneWordData.word()].addOneOccurrence();
+        wordStats[oneWordData.word()].addOneOccurrence(oneWordData.lineNumber());
     }
-    return wordCount;
+    return wordStats;
 }
 
 WordCount getWordCount(std::string const& code)
 {
     auto const words = getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>(code);
-    auto const wordCount = countWords(words);
+    auto const wordCount = wordStats(words);
     
     auto sortedWordCount = WordCount(begin(wordCount), end(wordCount));
     std::sort(begin(sortedWordCount), end(sortedWordCount), [](auto const& p1, auto const& p2){ return p1.second > p2.second; });

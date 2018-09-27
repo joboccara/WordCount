@@ -2,6 +2,7 @@
 #define WordCount_hpp
 
 #include "helpers.hpp"
+#include "boost/optional.hpp"
 
 #include <string>
 #include <utility>
@@ -16,12 +17,12 @@ enum class HowToDelimitWords
 class WordData : public Comparable<WordData>
 {
 public:
-    WordData(std::string word, size_t position);
+    WordData(std::string word, size_t lineNumber);
     std::string const& word() const;
-    size_t position() const { return position_; }
+    size_t lineNumber() const { return lineNumber_; }
 private:
     std::string word_;
-    size_t position_;
+    size_t lineNumber_;
 };
 
 bool operator<(WordData const& wordStats1, WordData const& wordStats2);
@@ -34,12 +35,12 @@ class WordStats : public Comparable<WordStats>
 public:
     WordStats();
     size_t nbOccurrences() const;
-    void addOneOccurrence();
+    void addOneOccurrence(size_t lineNumber);
+    size_t span() const;
 private:
     size_t nbOccurrences_;
-
-public: // reserved for testing
-    explicit WordStats(size_t nbOccurrences);
+    boost::optional<size_t> lowestOccurringLine_;
+    boost::optional<size_t> highestOccurringLine_;
 };
 
 bool operator<(WordStats const& wordStats1, WordStats const& wordStats2);
