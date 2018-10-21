@@ -2,6 +2,7 @@
 #include "helpers.hpp"
 #include "WordCount.hpp"
 #include <algorithm>
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -20,6 +21,8 @@ void print(WordCount const& entries)
     << std::setw(4) << std::right << "#"
     << '|'
     << std::setw(4) << std::right << "span"
+    << '|'
+    << std::setw(11) << std::right << "proportion"
     << '\n';
     std::cout << std::string(longestWordSize + 1 + 1 + 4 + 1 + 4, '-') << '\n';
     
@@ -31,6 +34,8 @@ void print(WordCount const& entries)
         << std::setw(4) << std::right << entry.second.nbOccurrences()
         << '|'
         << std::setw(4) << std::right << entry.second.span()
+        << '|'
+        << std::setw(10) << std::right << std::round(entry.second.proportion() * 100 * 100) / 100. << '%'
         << '\n';
     }
 }
@@ -46,28 +51,29 @@ if (insertionMarker == null) {
     positions.add(block.getStart());
     )";
 
-    auto const getResults = project([](auto const& entry){ return std::make_tuple(entry.first, entry.second.nbOccurrences(), entry.second.span()); });
+    auto const getResults = project([](auto const& entry){ return std::make_tuple(entry.first, entry.second.nbOccurrences(), entry.second.span(), entry.second.proportion()); });
 
-    auto const expected = std::vector<std::tuple<std::string, size_t, size_t>> {
-        {"insertion", 6, 4},
-        {"Marker", 6, 4},
-        {"get", 5, 6},
-        {"block", 4, 6},
-        {"key", 3, 5},
-        {"Start", 3, 6},
-        {"Insertion", 2, 3},
-        {"Map", 2, 4},
-        {"add", 1, 1},
-        {"if", 1, 1},
-        {"Length", 1, 1},
-        {"Integer", 1, 1},
-        {"new", 1, 1},
-        {"null", 1, 1},
-        {"positions", 1, 1},
-        {"put", 1, 1} };
+    // print(getWordCount(input));
+
+    auto const expected = std::vector<std::tuple<std::string, size_t, size_t, double>> {
+        {"insertion", 6, 4, 0.5},
+        {"Marker", 6, 4, 0.5},
+        {"get", 5, 6, 0.75},
+        {"block", 4, 6, 0.75},
+        {"key", 3, 5, 0.625},
+        {"Start", 3, 6, 0.75},
+        {"Insertion", 2, 3, 0.375},
+        {"Map", 2, 4, 0.5},
+        {"add", 1, 1, 0.125},
+        {"if", 1, 1, 0.125},
+        {"Length", 1, 1, 0.125},
+        {"Integer", 1, 1, 0.125},
+        {"new", 1, 1, 0.125},
+        {"null", 1, 1, 0.125},
+        {"positions", 1, 1, 0.125},
+        {"put", 1, 1, 0.125} };
     REQUIRE(getResults(getWordCount(input)) == expected);
     
-    print(getWordCount(input));
 }
 
 auto const words = projectOnMember(&WordData::word);

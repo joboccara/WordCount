@@ -34,11 +34,15 @@ class WordStats : public Comparable<WordStats>
 {
 public:
     WordStats();
+    void setTotalNumberOfLines(size_t totalNumberOfLines);
     size_t nbOccurrences() const;
     void addOneOccurrence(size_t lineNumber);
     size_t span() const;
+    double proportion() const;
 private:
-    size_t nbOccurrences_;
+    size_t totalNumberOfLines_ = 0;
+    size_t totalNumberOfLines() const;
+    size_t nbOccurrences_ = 0;
     boost::optional<size_t> lowestOccurringLine_;
     boost::optional<size_t> highestOccurringLine_;
 };

@@ -46,6 +46,23 @@ size_t WordStats::span() const
     }
 }
 
+double WordStats::proportion() const
+{
+    if (totalNumberOfLines() == 0) return 0;
+    
+    return span() / static_cast<double>(totalNumberOfLines());
+}
+
+size_t WordStats::totalNumberOfLines() const
+{
+    return totalNumberOfLines_;
+}
+
+void WordStats::setTotalNumberOfLines(size_t totalNumberOfLines)
+{
+    totalNumberOfLines_ = totalNumberOfLines;
+}
+
 bool operator<(WordStats const& wordStats1, WordStats const& wordStats2)
 {
     return wordStats1.nbOccurrences() < wordStats2.nbOccurrences();
@@ -113,20 +130,27 @@ std::vector<std::string> getSymbols(std::string const& code)
     return symbols;
 }
 
-std::map<std::string, WordStats> wordStats(std::vector<WordData> const& wordData)
+std::map<std::string, WordStats> wordStats(std::vector<WordData> const& wordData, size_t numberOfLines)
 {
     auto wordStats = std::map<std::string, WordStats>{};
     for (auto const& oneWordData : wordData)
     {
-        wordStats[oneWordData.word()].addOneOccurrence(oneWordData.lineNumber());
+        auto& oneWordStats = wordStats[oneWordData.word()];
+        oneWordStats.setTotalNumberOfLines(numberOfLines);
+        oneWordStats.addOneOccurrence(oneWordData.lineNumber());
     }
     return wordStats;
+}
+
+size_t numberOfLines(std::string const& code)
+{
+    return std::count(begin(code), end(code), '\n') + 1;
 }
 
 WordCount getWordCount(std::string const& code)
 {
     auto const words = getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>(code);
-    auto const wordCount = wordStats(words);
+    auto const wordCount = wordStats(words, numberOfLines(code));
     
     auto sortedWordCount = WordCount(begin(wordCount), end(wordCount));
     std::sort(begin(sortedWordCount), end(sortedWordCount), [](auto const& p1, auto const& p2){ return p1.second > p2.second; });
