@@ -2,7 +2,6 @@
 #define WordCount_hpp
 
 #include "helpers.hpp"
-#include "boost/optional.hpp"
 
 #include <string>
 #include <utility>
@@ -43,8 +42,8 @@ private:
     size_t totalNumberOfLines_ = 0;
     size_t totalNumberOfLines() const;
     size_t nbOccurrences_ = 0;
-    boost::optional<size_t> lowestOccurringLine_;
-    boost::optional<size_t> highestOccurringLine_;
+    size_t lowestOccurringLine_ = 0;
+    size_t highestOccurringLine_ = 0;
 };
 
 bool operator<(WordStats const& wordStats1, WordStats const& wordStats2);

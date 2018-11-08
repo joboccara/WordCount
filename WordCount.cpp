@@ -16,33 +16,27 @@ size_t WordStats::nbOccurrences() const
 void WordStats::addOneOccurrence(size_t lineNumber)
 {
     ++nbOccurrences_;
-    if (!lowestOccurringLine_)
+    
+    if (nbOccurrences_ == 1)
     {
-        lowestOccurringLine_ = lineNumber;
+        lowestOccurringLine_ = highestOccurringLine_ = lineNumber;
     }
     else
     {
-        lowestOccurringLine_ = std::min(*lowestOccurringLine_, lineNumber);
-    }
-    if (!highestOccurringLine_)
-    {
-        highestOccurringLine_ = lineNumber;
-    }
-    else
-    {
-        highestOccurringLine_ = std::max(*highestOccurringLine_, lineNumber);
+        lowestOccurringLine_ = std::min(lowestOccurringLine_, lineNumber);
+        highestOccurringLine_ = std::max(highestOccurringLine_, lineNumber);
     }
 }
 
 size_t WordStats::span() const
 {
-    if (!lowestOccurringLine_ || !lowestOccurringLine_)
+    if (nbOccurrences_ == 0)
     {
         return 0;
     }
     else
     {
-        return *highestOccurringLine_ - *lowestOccurringLine_ + 1;
+        return highestOccurringLine_ - lowestOccurringLine_ + 1;
     }
 }
 
