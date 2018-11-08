@@ -1,5 +1,4 @@
 #include "WordCount.hpp"
-#include <boost/algorithm/string.hpp>
 #include <algorithm>
 #include <cctype>
 #include <iterator>
@@ -114,14 +113,6 @@ template<>
 std::vector<WordData> getWordDataFromCode<HowToDelimitWords::WordsInCamelCase>(std::string const& code)
 {
     return getWordDataFromCode(code, [](char c){ return isDelimiter(c) || isupper(c); });
-}
-
-std::vector<std::string> getSymbols(std::string const& code)
-{
-    auto symbols = std::vector<std::string>{};
-    boost::split(symbols, code, isDelimiter);
-    symbols.erase(std::remove(begin(symbols), end(symbols), ""), end(symbols));
-    return symbols;
 }
 
 std::map<std::string, WordStats> wordStats(std::vector<WordData> const& wordData, size_t numberOfLines)
